@@ -106,56 +106,61 @@ for fold in FFOLDERS:
                     DATE = dater.strftime("%Y-%m-%d %I:%M%p")
                 else:
                     DATE = ''
-                metaline = body[0].replace('#SOHn=LET', '').replace('#STX', '')
-                if 'k=' in metaline:
-                    split1 = metaline.split('k=')[1].strip()
-                    SECTION = ''
-                else:
-                    split1 = metaline.split('null')[1].strip()
-                split2 = split1.split('a=')
-                SECTION = split2[0].strip()
-                split3 = split2[1].split('h=')#['Al Mccray, PO Box 280486, Tampa, FL/USA 33682 ', '(813)2440664, mccray@tampanewsandtalk.com']
-                namer = split3[0].split(',')#['Al Mccray', ' PO Box 280486', ' Tampa', ' FL/USA 33682']
-                NAME = namer[0].strip().decode('latin-1')
-                ADDR = namer[1].strip()
-                if len(namer) > 2:
-                    CITY = namer[2].strip()
-                else:
-                    CITY = ''
-                if len(namer)>3:
-                    mixer = namer[3].split(' ')
-                    STATE = mixer[0].strip()
-                    if len(mixer)>1:
-                        ZIP = mixer[1].strip()
+                try:
+                    metaline = body[0].replace('#SOHn=LET', '').replace('#STX', '')
+                    if 'k=' in metaline:
+                        split1 = metaline.split('k=')[1].strip()
+                        SECTION = ''
                     else:
-                        ZIP = ''
+                        split1 = metaline.split('null')[1].strip()
+                    split2 = split1.split('a=')
+                    SECTION = split2[0].strip()
+                    split3 = split2[1].split('h=')#['Al Mccray, PO Box 280486, Tampa, FL/USA 33682 ', '(813)2440664, mccray@tampanewsandtalk.com']
+                    namer = split3[0].split(',')#['Al Mccray', ' PO Box 280486', ' Tampa', ' FL/USA 33682']
+                    NAME = namer[0].strip().decode('latin-1')
+                    ADDR = namer[1].strip()
+                except:
+                    print "couldn't parse %s" % metaline
+                    continue
                 else:
-                    STATE, ZIP = ('', '')
-                if len(split3)>1:
-                    phoner = split3[1].split(',')#[(813)2440664', ' mccray@tampanewsandtalk.com']
-                else:
-                    phoner = []
-                if len(phoner)==2:
-                    PHONE = phoner[0].strip()
-                    EMAIL = phoner[1].strip()
-                elif len(phoner)==1:
-                    if '@' in phoner[0]:
-                        EMAIL = phoner[0].strip()
-                        PHONE = ''
+                    if len(namer) > 2:
+                        CITY = namer[2].strip()
                     else:
-                        EMAIL = ''
+                        CITY = ''
+                    if len(namer)>3:
+                        mixer = namer[3].split(' ')
+                        STATE = mixer[0].strip()
+                        if len(mixer)>1:
+                            ZIP = mixer[1].strip()
+                        else:
+                            ZIP = ''
+                    else:
+                        STATE, ZIP = ('', '')
+                    if len(split3)>1:
+                        phoner = split3[1].split(',')#[(813)2440664', ' mccray@tampanewsandtalk.com']
+                    else:
+                        phoner = []
+                    if len(phoner)==2:
                         PHONE = phoner[0].strip()
-                else:
-                        EMAIL = ''
-                        PHONE = ''
-                SUBJ = body[1].replace('Subject:', '').strip().decode('latin-1')
-                EID = slugify("%s_%s" % (SUBJ[:5], dater))
-                BODY = "\n".join([bit.strip() for bit in body[2:-2] if bit.strip()])
-                BODY = BODY.decode('latin-1')
-                put_data['objects'].append({
-                                'external_id': unicode(EID),
-                                'data': [DATE, SUBJ, BODY, NAME, ADDR, CITY, STATE, ZIP, PHONE, EMAIL, SECTION]
-                                })
+                        EMAIL = phoner[1].strip()
+                    elif len(phoner)==1:
+                        if '@' in phoner[0]:
+                            EMAIL = phoner[0].strip()
+                            PHONE = ''
+                        else:
+                            EMAIL = ''
+                            PHONE = phoner[0].strip()
+                    else:
+                            EMAIL = ''
+                            PHONE = ''
+                    SUBJ = body[1].replace('Subject:', '').strip().decode('latin-1')
+                    EID = slugify("%s_%s" % (SUBJ[:5], dater))
+                    BODY = "\n".join([bit.strip() for bit in body[2:-2] if bit.strip()])
+                    BODY = BODY.decode('latin-1')
+                    put_data['objects'].append({
+                                    'external_id': unicode(EID),
+                                    'data': [DATE, SUBJ, BODY, NAME, ADDR, CITY, STATE, ZIP, PHONE, EMAIL, SECTION]
+                                    })
         ftp.cwd("..")
 
 ftp.quit()
