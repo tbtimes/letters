@@ -15,7 +15,7 @@ FTP_USER = "ad/%s" % os.getenv('USER')
 PANDA_KEY = os.getenv('PANDA_API_KEY')
 FTP_LOGON = os.getenv('TIMES_LOGON')
 
-PANDA_API = 'http://ec2-23-23-103-70.compute-1.amazonaws.com/api/1.0'
+PANDA_API = os.getenv('PANDA_API_ROOT')
 PANDA_AUTH_PARAMS = {
     'email': USER,
     'api_key': PANDA_KEY
